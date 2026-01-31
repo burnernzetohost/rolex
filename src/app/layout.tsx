@@ -5,7 +5,7 @@ import "./globals.css";
 // Define the custom font
 const theSeasons = localFont({
   src: "../../public/fonts/Fontspring-DEMO-theseasons-bd.otf",
-  variable: "--font-the-seasons",
+  variable: "--Fontspring-theseasons-bd",
 });
 
 export const metadata: Metadata = {
