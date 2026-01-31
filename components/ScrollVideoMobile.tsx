@@ -4,10 +4,7 @@ import { useEffect, useRef } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { motion, useScroll, useTransform } from 'framer-motion'
-import Lenis from 'lenis'
 
-// Helper component for letter-by-letter animation
-// Helper component for letter-by-letter animation - FIXED
 const CharacterAnimation = ({ text, range, scrollYProgress }: { text: string, range: [number, number], scrollYProgress: any }) => {
   const characters = text.split('');
   const amount = range[1] - range[0];
@@ -29,8 +26,7 @@ const CharacterAnimation = ({ text, range, scrollYProgress }: { text: string, ra
   );
 };
 
-
-export default function ScrollVideo() {
+export default function ScrollVideoMobile() {
   const containerRef = useRef<HTMLDivElement>(null)
   const videoRef1 = useRef<HTMLVideoElement>(null)
   const videoRef2 = useRef<HTMLVideoElement>(null)
@@ -42,7 +38,6 @@ export default function ScrollVideo() {
     offset: ["start start", "end end"]
   });
 
-  // Transitions with TINY 1% dead scroll
   const firstSequenceY = useTransform(scrollYProgress, [0.19, 0.23], ["0vh", "-100vh"]);
   const secondSequenceY = useTransform(scrollYProgress, [0.19, 0.23], ["100vh", "0vh"]);
   
@@ -53,21 +48,6 @@ export default function ScrollVideo() {
   const fourthSequenceY = useTransform(scrollYProgress, [0.70, 0.74], ["100vh", "0vh"]);
 
   useEffect(() => {
-    // Initialize Lenis smooth scroll
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      syncTouch: false,
-    })
-
-    function raf(time: number) {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
-    }
-
-    requestAnimationFrame(raf)
-
     gsap.registerPlugin(ScrollTrigger)
     
     const video1 = videoRef1.current
@@ -76,8 +56,11 @@ export default function ScrollVideo() {
     const video4 = videoRef4.current
     if (!video1 || !video2 || !video3 || !video4) return
 
+    ScrollTrigger.config({ 
+      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
+    });
+
     const ctx = gsap.context(() => {
-      // SEQUENCE 1 (0-18% scroll) - WITH 0.5s delay
       const setupVideo1 = () => {
         if (!video1.duration) return;
         const startOffset = 0.5;
@@ -92,74 +75,69 @@ export default function ScrollVideo() {
             scrollTrigger: {
               trigger: ".scroll-container",
               start: "top top",
-              end: "18% top",
-              scrub: 0.5,
+              end: "24% top",
+              scrub: true,
+              invalidateOnRefresh: true,
             },
           }
         )
       };
 
-      // SEQUENCE 2 (23-43% scroll) - NO delay
       const setupVideo2 = () => {
         if (!video2.duration) return;
-        const startOffset = 0.0;
-        const endOffset = 0.0;
-        video2.currentTime = startOffset;
+        video2.currentTime = 0;
 
         gsap.fromTo(video2, 
-          { currentTime: startOffset },
+          { currentTime: 0 },
           {
-            currentTime: video2.duration - endOffset,
+            currentTime: video2.duration,
             ease: "none",
             scrollTrigger: {
               trigger: ".scroll-container",
               start: "23% top",
-              end: "43% top",
-              scrub: 0.5,
+              end: "57% top",
+              scrub: true,
+              invalidateOnRefresh: true,
             },
           }
         )
       };
 
-      // SEQUENCE 3 (48-68% scroll) - NO delay
       const setupVideo3 = () => {
         if (!video3.duration) return;
-        const startOffset = 0.0;
-        const endOffset = 0.0;
-        video3.currentTime = startOffset;
+        video3.currentTime = 0;
 
         gsap.fromTo(video3, 
-          { currentTime: startOffset },
+          { currentTime: 0 },
           {
-            currentTime: video3.duration - endOffset,
+            currentTime: video3.duration,
             ease: "none",
             scrollTrigger: {
               trigger: ".scroll-container",
               start: "48% top",
-              end: "68% top",
-              scrub: 0.5,
+              end: "90% top",
+              scrub: true,
+              invalidateOnRefresh: true,
             },
           }
         )
       };
 
-      // SEQUENCE 4 (73-100% scroll) - NO delay
       const setupVideo4 = () => {
         if (!video4.duration) return;
-        const startOffset = 0.0;
-        const endOffset = 0.0;
-        video4.currentTime = startOffset;
+        video4.currentTime = 0;
 
         gsap.fromTo(video4, 
-          { currentTime: startOffset },
+          { currentTime: 0 },
           {
-            currentTime: video4.duration - endOffset,
+            currentTime: video4.duration,
             ease: "none",
             scrollTrigger: {
               trigger: ".scroll-container",
               start: "74% top",
               end: "bottom bottom",
-              scrub: 0.5,
+              scrub: true,
+              invalidateOnRefresh: true,
             },
           }
         )
@@ -180,30 +158,35 @@ export default function ScrollVideo() {
 
     return () => {
       ctx.revert()
-      lenis.destroy()
     }
   }, [])
 
   return (
-    <div ref={containerRef} className="scroll-container relative h-[4000vh] bg-black">
-      {/* SEQUENCE 1 - rolex11.mp4 */}
+    <div ref={containerRef} className="scroll-container relative h-[3000vh] bg-black" style={{ overflow: 'auto' }}>
+      {/* SEQUENCE 1 */}
       <motion.div className="fixed inset-0 w-full h-screen z-40">
         <motion.div style={{ y: firstSequenceY }} className="w-full h-full">
-          <video
-            ref={videoRef1}
-            src="/rolex11.mp4"
-            muted
-            playsInline
-            preload="auto"
-            className="w-full h-full object-contain mix-blend-screen"
-          />
+          <div className="w-full h-full flex items-center justify-center" style={{ transform: 'scale(2)' }}>
+            <video
+              ref={videoRef1}
+              src="/mobilerolex1.mp4"
+              muted
+              playsInline
+              preload="auto"
+              className="w-full h-full object-contain mix-blend-screen"
+              style={{ 
+                pointerEvents: 'none',
+                transform: 'translate3d(0, 0, 0)',
+                willChange: 'auto'
+              }}
+            />
+          </div>
 
-          {/* Top Left Text */}
-          <div className="absolute left-[5%] top-[25%] z-30 max-w-[340px] text-white">
+          <div className="absolute left-[5%] top-[15%] z-30 max-w-[90%] text-white px-4">
             <h2 className="text-[40px] mb-0" style={{ fontFamily: 'var(--Fontspring-theseasons-bd)', lineHeight: '0.9' }}>
               <CharacterAnimation text="Submariner" range={[0.01, 0.05]} scrollYProgress={scrollYProgress} />
             </h2>
-            <p className="text-[22px] leading-[1.3] font-light mt-2" style={{ fontFamily: 'Times New Roman, serif' }}>
+            <p className="text-[14px] leading-[1.3] font-light mt-2" style={{ fontFamily: 'Times New Roman, serif' }}>
               <CharacterAnimation
                 text="A Luxury Swiss dive watch introduced in 1953, known for its 300m water resistance, rotating bezel, and super durable design."
                 range={[0.05, 0.12]}
@@ -212,9 +195,8 @@ export default function ScrollVideo() {
             </p>
           </div>
 
-          {/* Bottom Right Text */}
-          <div className="absolute right-[5%] bottom-[15%] z-30 max-w-[350px] text-white text-right">
-            <p className="text-[22px] leading-[1.3] font-light" style={{ fontFamily: 'Times New Roman, serif' }}>
+          <div className="absolute right-[5%] bottom-[15%] z-30 max-w-[90%] text-white text-right px-4">
+            <p className="text-[14px] leading-[1.3] font-light" style={{ fontFamily: 'Times New Roman, serif' }}>
               <CharacterAnimation
                 text="A refined mechanical timepiece crafted with meticulous detail, featuring a sleek silhouette and enduring design language."
                 range={[0.12, 0.18]}
@@ -225,25 +207,31 @@ export default function ScrollVideo() {
         </motion.div>
       </motion.div>
 
-      {/* SEQUENCE 2 - rolex22.mp4 */}
+      {/* SEQUENCE 2 */}
       <motion.div className="fixed inset-0 w-full h-screen z-30">
         <motion.div style={{ y: secondSequenceY }} className="w-full h-full">
           <motion.div style={{ y: secondSequenceY2 }} className="w-full h-full">
-            <video
-              ref={videoRef2}
-              src="/rolex22.mp4"
-              muted
-              playsInline
-              preload="auto"
-              className="w-full h-full object-contain mx-auto ml-[10%]"
-            />
+            <div style={{ transform: 'translateY(260%)' }}>
+              <video
+                ref={videoRef2}
+                src="/mobilerolex2.mp4"
+                muted
+                playsInline
+                preload="auto"
+                className="w-full h-full object-contain"
+                style={{ 
+                  pointerEvents: 'none',
+                  transform: 'translate3d(0, 0, 0)',
+                  willChange: 'auto'
+                }}
+              />
+            </div>
 
-            {/* Left side text */}
-            <div className="absolute left-[5%] top-[15%] z-30 max-w-[400px] text-white">
-              <h2 className="text-[40px] mb-0" style={{ fontFamily: 'var(--Fontspring-theseasons-bd)', lineHeight: '0.9' }}>
+            <div className="absolute left-[5%] top-[15%] z-30 max-w-[90%] text-white px-4">
+              <h2 className="text-[24px] mb-0" style={{ fontFamily: 'var(--Fontspring-theseasons-bd)', lineHeight: '0.9' }}>
                 <CharacterAnimation text="Born in 1953" range={[0.24, 0.28]} scrollYProgress={scrollYProgress} />
               </h2>
-              <p className="text-[22px] leading-[1.3] font-light mt-2 mb-6" style={{ fontFamily: 'Times New Roman, serif' }}>
+              <p className="text-[22px] leading-[1.3] font-light mt-2 mb-4" style={{ fontFamily: 'Times New Roman, serif' }}>
                 <CharacterAnimation
                   text="From ocean depths to black-tie evenings, it became the symbol of effortless power and refined adventure."
                   range={[0.28, 0.35]}
@@ -262,25 +250,29 @@ export default function ScrollVideo() {
         </motion.div>
       </motion.div>
 
-      {/* SEQUENCE 3 - rolex33.mp4 */}
+      {/* SEQUENCE 3 */}
       <motion.div className="fixed inset-0 w-full h-screen z-20">
         <motion.div style={{ y: thirdSequenceY }} className="w-full h-full">
           <motion.div style={{ y: thirdSequenceY2 }} className="w-full h-full">
             <video
               ref={videoRef3}
-              src="/rolex33.mp4"
+              src="/mobilerolex3.mp4"
               muted
               playsInline
               preload="auto"
               className="w-full h-full object-contain"
+              style={{ 
+                pointerEvents: 'none',
+                transform: 'translate3d(0, 0, 0)',
+                willChange: 'auto'
+              }}
             />
 
-            {/* Right side text for sequence 3 */}
-            <div className="absolute left-[5%] top-[15%] z-30 max-w-[400px] text-white text-left">
+            <div className="absolute left-[5%] top-[15%] z-30 max-w-[90%] text-white px-4">
               <h2 className="text-[40px] mb-0" style={{ fontFamily: 'var(--Fontspring-theseasons-bd)', lineHeight: '0.9' }}>
                 <CharacterAnimation text="Premium Build" range={[0.49, 0.53]} scrollYProgress={scrollYProgress} />
               </h2>
-              <p className="text-[22px] leading-[1.3] font-light mt-2" style={{ fontFamily: 'Times New Roman, serif' }}>
+              <p className="text-[15px] leading-[1.3] font-light mt-2" style={{ fontFamily: 'Times New Roman, serif' }}>
                 <CharacterAnimation
                   text="Engineered like armor, finished like art."
                   range={[0.53, 0.68]}
@@ -292,24 +284,30 @@ export default function ScrollVideo() {
         </motion.div>
       </motion.div>
 
-      {/* SEQUENCE 4 - rolex44.mp4 */}
+      {/* SEQUENCE 4 */}
       <motion.div className="fixed inset-0 w-full h-screen z-10">
         <motion.div style={{ y: fourthSequenceY }} className="w-full h-full">
-          <video
-            ref={videoRef4}
-            src="/rolex44.mp4"
-            muted
-            playsInline
-            preload="auto"
-            className="w-full h-full object-contain mx-auto ml-[10%]"
-          />
+          <div className="w-full h-full flex items-center justify-center" style={{ transform: 'scale(2)' }}>
+            <video
+              ref={videoRef4}
+              src="/mobilerolex4.mp4"
+              muted
+              playsInline
+              preload="auto"
+              className="w-full h-full object-contain"
+              style={{ 
+                pointerEvents: 'none',
+                transform: 'translate3d(0, 0, 0)',
+                willChange: 'auto'
+              }}
+            />
+          </div>
 
-          {/* Left side text for sequence 4 */}
-          <div className="absolute left-[5%] bottom-[15%] z-30 max-w-[400px] text-white">
-            <h2 className="text-[40px] mb-0" style={{ fontFamily: 'var(--Fontspring-theseasons-bd)', lineHeight: '0.9' }}>
+          <div className="absolute left-[5%] bottom-[15%] z-30 max-w-[90%] text-white px-4">
+            <h2 className="text-[24px] mb-0" style={{ fontFamily: 'var(--Fontspring-theseasons-bd)', lineHeight: '0.9' }}>
               <CharacterAnimation text="Contact" range={[0.74, 0.79]} scrollYProgress={scrollYProgress} />
             </h2>
-            <p className="text-[22px] leading-[1.3] font-light mt-2" style={{ fontFamily: 'Times New Roman, serif' }}>
+            <p className="text-[14px] leading-[1.3] font-light mt-2" style={{ fontFamily: 'Times New Roman, serif' }}>
               <CharacterAnimation
                 text="aryanp.5501@gmail.com"
                 range={[0.79, 1.0]}
